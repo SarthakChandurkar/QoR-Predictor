@@ -1,13 +1,13 @@
 # QoR Predictor
 
-A machine learning-based Quality of Results (QoR) predictor for estimating **delay** in digital circuit designs during logic synthesis, developed as part of the CS533 ML for EDA course. The project leverages the ABC synthesis tool and a custom deep learning model, **ABColabX**, to predict QoR metrics (primarily delay) for a given design and synthesis recipe, enabling rapid design space exploration without running computationally expensive synthesis.
+A machine learning-based Quality of Results (QoR) predictor for estimating **delay** in digital circuit designs during logic synthesis. The project leverages the ABC synthesis tool and a custom deep learning model, to predict QoR metrics (primarily delay) for a given design and synthesis recipe, enabling rapid design space exploration without running computationally expensive synthesis.
 
 ## Project Overview
 
 The **QoR Predictor** is designed to estimate the delay of a digital circuit design based on its And-Inverter Graph (AIG) structure and a synthesis recipe. The project includes:
 - **Data Generation**: Generating labeled datasets by synthesizing designs with various recipes using the ABC tool.
 - **Recipe Optimization**: Exploring standard, random, semi-random handcrafted, and simulated annealing-based synthesis recipes to optimize QoR.
-- **ML Model (ABColabX)**: A custom end-to-end deep learning model that combines a **Graph Encoder** (based on GraphSAGE), a **Recipe Encoder** (using Transformer layers), and a **Cross-Attention Fusion** module to predict delay.
+- **ML Model**: A custom end-to-end deep learning model that combines a **Graph Encoder** (based on GraphSAGE), a **Recipe Encoder** (using Transformer layers), and a **Cross-Attention Fusion** module to predict delay.
 - **Fine-Tuning**: Adapting the model to new, unseen designs by retraining on a small set of synthesis recipes.
 
 The project uses **Python** (for ML model development and data processing), **C++** (for performance-critical tasks), and **Shell** scripts (for automation). It is built on top of the **OpenABC-D** dataset framework and integrates with the **Yosys-ABC** synthesis tool.
@@ -24,7 +24,7 @@ The project uses **Python** (for ML model development and data processing), **C+
 - **out_label/**: Stores delay labels for each design-recipe pair in CSV format.
 - **predefined_recipe_runner.sh**: Shell script to run standard synthesis recipes and compute QoR metrics (delay, area).
 - **handcrafted_recipe_generator.cpp**: C++ script to generate semi-random handcrafted synthesis recipes.
-- **train.py**: Python script for training the ABColabX model.
+- **train.py**: Python script for training the Custom model.
 - **Predefined Recipe Results.pdf**: Document containing results of standard recipe runs.
 - **README.md**: This file.
 
@@ -120,7 +120,7 @@ Generate a dataset of AIGs and QoR metrics for training the model:
 - **Simulated Annealing**:
   Run the simulated annealing algorithm (implemented in Python) to optimize recipes for the delay-area product (QoR). Results are stored in the repository.
 
-### 3. Training the ABColabX Model
+### 3. Training the Custom Model
 Train the model using:
 ```bash
 python train.py --datadir OPENABC-D --rundir OUTPUT/NETV1_set1 --dataset set1 --lp 1 --lr 0.001 --epochs 20 --target delay
@@ -146,7 +146,7 @@ Fine-tune the model on new designs:
 Evaluate the model using **Mean Squared Error (MSE)**, **Mean Absolute Percentage Error (MAPE)**, and **R² Score**. Results are saved in the `rundir` specified during training.
 
 ## Key Features
-- **ABColabX Model**:
+- **Custom Model**:
   - **Graph Encoder**: Uses GraphSAGE with residual connections, BatchNorm, and dropout for robust AIG feature extraction.
   - **Recipe Encoder**: Employs Transformer layers with sinusoidal positional encoding to capture recipe sequence dependencies.
   - **Cross-Attention Fusion**: Combines graph and recipe embeddings using bidirectional cross-attention for context-aware predictions.
@@ -158,7 +158,7 @@ Evaluate the model using **Mean Squared Error (MSE)**, **Mean Absolute Percentag
 - **Standard Recipes**: Evaluated recipes like `resyn`, `compress2`, and `choice` from ABC’s `abc.rc` file.
 - **Semi-Random Handcrafted Recipes**: Outperformed standard recipes in many cases, with key operations like `rs` (with cuts), `b`, and `fraig_restore`.
 - **Simulated Annealing**: Further optimized recipes, achieving better QoR (delay-area product) for designs like `simple_spi` and `tv80`.
-- **ABColabX Model**: Achieves low MSE and MAPE, with improved performance after fine-tuning on new designs.
+- **Custom Model**: Achieves low MSE and MAPE, with improved performance after fine-tuning on new designs.
 
 ## Challenges and Insights
 - **Data Generation**: Permission issues with shell scripts were resolved using `chmod +x`. Incorrect step ordering in the original OpenABC-D pipeline required reordering (e.g., running `synthID2SeqMapping.py` before `PyGDataAIG.py`).
